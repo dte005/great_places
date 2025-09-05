@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:great_places/pages/auth_pages/check_auth_page.dart';
+import 'package:great_places/pages/places_form_page.dart';
 import 'package:great_places/providers/auth_provider.dart';
+import 'package:great_places/providers/places_provider.dart';
 import 'package:great_places/routes.dart';
 import 'package:provider/provider.dart';
 
@@ -15,7 +17,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => AuthProvider())],
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => PlacesProvider()),
+      ],
       child: MaterialApp(
         title: 'Great Places',
         theme: ThemeData(
@@ -30,11 +35,15 @@ class MyApp extends StatelessWidget {
           ),
           colorScheme: ColorScheme.fromSeed(
             primary: Colors.indigo,
+            secondary: Colors.amber,
             seedColor: Colors.amber,
           ),
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        routes: {Routes.checkAuth: (ctx) => CheckAuth()},
+        routes: {
+          Routes.checkAuth: (ctx) => CheckAuth(),
+          Routes.placesForm: (cts) => PlacesForm(),
+        },
         debugShowCheckedModeBanner: false,
       ),
     );

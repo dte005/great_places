@@ -57,6 +57,7 @@ class AuthProvider with ChangeNotifier {
     _email = null;
     _token = null;
     await Store.removeString('token');
+    await Store.removeString('email');
     notifyListeners();
   }
 }
