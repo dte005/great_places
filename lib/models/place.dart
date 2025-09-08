@@ -1,11 +1,6 @@
 import 'dart:io';
 
-class PlaceLocation {
-  final String lat;
-  final String lng;
-  final String? address;
-  const PlaceLocation({required this.lat, required this.lng, this.address});
-}
+import 'location.dart';
 
 class Place {
   final String id;

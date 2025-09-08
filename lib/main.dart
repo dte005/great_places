@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:great_places/pages/auth_pages/check_auth_page.dart';
-import 'package:great_places/pages/places_form_page.dart';
+import 'package:great_places/data/db/daos/location_dao.dart';
+import 'package:great_places/data/db/daos/place_dao.dart';
+import 'package:great_places/data/db/database.dart';
 import 'package:great_places/providers/auth_provider.dart';
 import 'package:great_places/providers/places_provider.dart';
 import 'package:great_places/routes.dart';
 import 'package:provider/provider.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -18,8 +20,25 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        Provider(create: (_) => AppDb(), dispose: (_, db) => db.close()),
+        ProxyProvider<AppDb, PlaceDao>(update: (_, db, __) => PlaceDao(db)),
+        ProxyProvider<AppDb, LocationDao>(
+          update: (_, db, __) => LocationDao(db),
+        ),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => PlacesProvider()),
+        ChangeNotifierProxyProvider2<PlaceDao, LocationDao, PlacesProvider>(
+          create: (ctx) => PlacesProvider(
+            placesDao: ctx.read<PlaceDao>(),
+            locationDao: ctx.read<LocationDao>(),
+          ),
+          update: (ctx, pDao, lDao, provider) {
+            if (provider == null) {
+              return PlacesProvider(placesDao: pDao, locationDao: lDao);
+            }
+            provider.rebind(pDao, lDao);
+            return provider;
+          },
+        ),
       ],
       child: MaterialApp(
         title: 'Great Places',
@@ -40,10 +59,7 @@ class MyApp extends StatelessWidget {
           ),
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        routes: {
-          Routes.checkAuth: (ctx) => CheckAuth(),
-          Routes.placesForm: (cts) => PlacesForm(),
-        },
+        routes: Routes.routes,
         debugShowCheckedModeBanner: false,
       ),
     );
