@@ -1,14 +1,103 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:great_places/pages/map_location_page.dart';
+import 'package:great_places/utils/location_util.dart';
+import 'package:location/location.dart';
 
 class LocationInput extends StatefulWidget {
-  const LocationInput({super.key});
+  final Function onSelectPosition;
+  const LocationInput({super.key, required this.onSelectPosition});
   @override
   State<LocationInput> createState() => _LocationInput();
 }
 
 class _LocationInput extends State<LocationInput> {
+  String _previewImageUrl = '';
+  bool _isLoadingMap = false;
+
+  Future<void> _getCurrentUserLocation() async {
+    setState(() {
+      _isLoadingMap = true;
+    });
+    final locData = await Location().getLocation();
+    final mapImageUrl = LocationUtil.generateLocationPreviewImage(
+      lat: locData.latitude,
+      lng: locData.longitude,
+    );
+
+    setState(() {
+      _previewImageUrl = mapImageUrl;
+    });
+    setState(() {
+      _isLoadingMap = false;
+    });
+
+    widget.onSelectPosition(LatLng(locData.latitude!, locData.longitude!));
+  }
+
+  Future<void> _selectOnMap() async {
+    final LatLng selectedLocation = await Navigator.of(context).push(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (ctx) => MapLocation(),
+      ),
+    );
+
+    final mapImageUrl = LocationUtil.generateLocationPreviewImage(
+      lat: selectedLocation.latitude,
+      lng: selectedLocation.longitude,
+    );
+
+    setState(() {
+      _previewImageUrl = mapImageUrl;
+    });
+
+    widget.onSelectPosition(selectedLocation);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Center();
+    return Column(
+      children: <Widget>[
+        Container(
+          height: 170,
+          width: double.infinity,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            border: Border.all(width: 1, color: Colors.grey),
+          ),
+          child: _previewImageUrl.isEmpty
+              ? _isLoadingMap
+                    ? CircularProgressIndicator()
+                    : Text('Localizaçao nao informada')
+              : Image.network(
+                  _previewImageUrl,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            TextButton.icon(
+              onPressed: _getCurrentUserLocation,
+              label: Text('Localizaçao atual'),
+              style: TextButton.styleFrom(
+                textStyle: TextStyle(color: Colors.grey),
+              ),
+              icon: Icon(Icons.location_on),
+            ),
+            TextButton.icon(
+              onPressed: _selectOnMap,
+              label: Text('Selecione no Mapa'),
+              style: TextButton.styleFrom(
+                textStyle: TextStyle(color: Colors.grey),
+              ),
+              icon: Icon(Icons.map),
+            ),
+          ],
+        ),
+      ],
+    );
   }
 }

@@ -9,7 +9,6 @@ import 'package:provider/provider.dart';
 class _MockAuthProvider extends Mock implements AuthProvider {}
 
 class _FakeHome extends StatelessWidget {
-  const _FakeHome({super.key});
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);

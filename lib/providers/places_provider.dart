@@ -2,15 +2,17 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:great_places/data/db/daos/location_dao.dart';
 import 'package:great_places/data/db/daos/place_dao.dart';
 import 'package:great_places/data/db/database.dart';
 import 'package:great_places/models/place.dart';
+import 'package:great_places/utils/location_util.dart';
 
 import '../models/location.dart';
 
 class PlacesProvider with ChangeNotifier {
-  List<Place> _items = [];
+  final List<Place> _items = [];
   PlaceDao placesDao;
   LocationDao locationDao;
 
@@ -74,16 +76,16 @@ class PlacesProvider with ChangeNotifier {
   void addPlace(
     String title,
     File image, [
-    String? lat,
-    String? lng,
+    LatLng? position,
     String? address,
   ]) async {
     await placesDao.attachedDatabase.transaction(() async {
+      final String addressTo = await LocationUtil.getAddressFrom(position!);
       final lId = await locationDao.insertLocation(
         LocationEntityCompanion.insert(
-          lat: lat ?? '',
-          lng: lng ?? '',
-          address: address ?? '',
+          lat: position.latitude.toString(),
+          lng: position.longitude.toString(),
+          address: addressTo.toString(),
         ),
       );
 

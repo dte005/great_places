@@ -1,30 +1,48 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:great_places/components/widgets/image_input.dart';
+import 'package:great_places/components/widgets/location_input.dart';
 import 'package:great_places/providers/places_provider.dart';
 import 'package:provider/provider.dart';
 
-class PlacesForm extends StatefulWidget {
-  const PlacesForm({super.key});
+class PlaceForm extends StatefulWidget {
+  const PlaceForm({super.key});
   @override
-  State<PlacesForm> createState() => _PlacesForm();
+  State<PlaceForm> createState() => _PlaceForm();
 }
 
-class _PlacesForm extends State<PlacesForm> {
+class _PlaceForm extends State<PlaceForm> {
   final TextEditingController _titleController = TextEditingController();
   File _pickedImage = File('');
+  LatLng _pickedPosition = LatLng(0, 0);
 
   void _selectImage(File pickedImage) {
-    _pickedImage = pickedImage;
+    setState(() {
+      _pickedImage = pickedImage;
+    });
+  }
+
+  void _selectPosition(LatLng position) {
+    setState(() {
+      _pickedPosition = position;
+    });
+  }
+
+  bool _isValidForm() {
+    return (_titleController.text.isNotEmpty &&
+        _pickedImage.existsSync() &&
+        _pickedPosition.latitude != 0.0 &&
+        _pickedPosition.longitude != 0.0);
   }
 
   void _onSubmit() {
-    if (_titleController.text.isEmpty || !_pickedImage.existsSync()) return;
+    if (!_isValidForm()) return;
     Provider.of<PlacesProvider>(
       context,
       listen: false,
-    ).addPlace(_titleController.text, _pickedImage);
+    ).addPlace(_titleController.text, _pickedImage, _pickedPosition);
     Navigator.of(context).pop();
   }
 
@@ -47,6 +65,8 @@ class _PlacesForm extends State<PlacesForm> {
                     ),
                     SizedBox(height: 20),
                     ImageInput(onSelectImage: _selectImage),
+                    SizedBox(height: 20),
+                    LocationInput(onSelectPosition: _selectPosition),
                   ],
                 ),
               ),
@@ -59,12 +79,17 @@ class _PlacesForm extends State<PlacesForm> {
                 ),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 elevation: WidgetStateProperty.all(0),
-                backgroundColor: WidgetStateProperty.all(
-                  Theme.of(context).colorScheme.secondary,
-                ),
+                backgroundColor: WidgetStateProperty.resolveWith<Color?>((
+                  states,
+                ) {
+                  if (states.contains(WidgetState.disabled)) {
+                    return Colors.grey;
+                  }
+                  return Theme.of(context).colorScheme.secondary;
+                }),
               ),
               icon: Icon(Icons.add),
-              onPressed: _onSubmit,
+              onPressed: _isValidForm() ? _onSubmit : null,
             ),
           ],
         ),

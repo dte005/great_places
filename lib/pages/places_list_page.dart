@@ -25,7 +25,7 @@ class PlacesList extends StatelessWidget {
         actions: <Widget>[
           IconButton(
             onPressed: () {
-              Navigator.of(context).pushNamed(Routes.placesForm);
+              Navigator.of(context).pushNamed(Routes.placeForm);
             },
             icon: Icon(Icons.add),
           ),
@@ -43,12 +43,50 @@ class PlacesList extends StatelessWidget {
             ? ch!
             : ListView.builder(
                 itemCount: places.itemsCount,
-                itemBuilder: (ctx, i) => ListTile(
-                  leading: CircleAvatar(
-                    backgroundImage: FileImage(places.itemByIndex(i).image),
-                  ),
-                  title: Text(places.itemByIndex(i).title),
-                  onTap: () {},
+                itemBuilder: (ctx, i) => Column(
+                  children: <Widget>[
+                    ListTile(
+                      leading: CircleAvatar(
+                        backgroundImage: FileImage(places.itemByIndex(i).image),
+                      ),
+                      trailing: PopupMenuButton(
+                        onSelected: (value) {
+                          if (value == "delete") {
+                            print("clicou em deletar");
+                          } else if (value == "detail") {
+                            Navigator.of(context).pushNamed(Routes.placeDetail);
+                          }
+                        },
+                        itemBuilder: (BuildContext context) => [
+                          const PopupMenuItem(
+                            value: "delete",
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: <Widget>[
+                                Text("Delete"),
+                                Icon(Icons.delete, color: Colors.redAccent),
+                              ],
+                            ),
+                          ),
+                          const PopupMenuItem(
+                            value: "detail",
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: <Widget>[
+                                Text("Detail"),
+                                Icon(
+                                  Icons.library_books_sharp,
+                                  color: Colors.indigo,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      title: Text(places.itemByIndex(i).title),
+                    ),
+                    const Divider(height: 0),
+                  ],
                 ),
               ),
       ),

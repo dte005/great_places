@@ -6,7 +6,7 @@ part 'location_dao.g.dart';
 
 @DriftAccessor(tables: [LocationEntity])
 class LocationDao extends DatabaseAccessor<AppDb> with _$LocationDaoMixin {
-  LocationDao(AppDb db) : super(db);
+  LocationDao(super.db);
 
   Future<int> insertLocation(LocationEntityCompanion location) =>
       into(locationEntity).insert(location);

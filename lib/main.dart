@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:great_places/data/db/daos/location_dao.dart';
 import 'package:great_places/data/db/daos/place_dao.dart';
 import 'package:great_places/data/db/database.dart';
@@ -7,8 +8,9 @@ import 'package:great_places/providers/places_provider.dart';
 import 'package:great_places/routes.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: '.env');
   runApp(const MyApp());
 }
 
